@@ -1,0 +1,58 @@
+# Maintainer: 
+
+pkgname=sonicmania-git
+pkgver=r1056.cfc89946
+pkgrel=1
+pkgdesc='A complete decompilation of Sonic Mania (2017)'
+arch=('any')
+url='https://github.com/Rubberduckycooly/Sonic-Mania-Decompilation'
+license=('custom:SONIC MANIA DECOMPILATION SOURCE CODE LICENSE v1')
+makedepends=('git')
+depends=('glew' 'glfw' 'libtheora' 'libvorbis' 'zlib' 'sdl2')
+provides=(sonicmania)
+source=(
+	"git+${url}"
+	'git+https://github.com/Rubberduckycooly/RSDKv5-Decompilation'
+	'git+https://github.com/nothings/stb'
+	'git+https://github.com/leethomason/tinyxml2'
+	'sonicmania-launcher'
+	'sonicmania.desktop'
+)
+sha256sums=(
+	'SKIP'
+	'SKIP'
+	'SKIP'
+	'SKIP'
+	'1115184935ab697d6a68292f15049e33bae0da5038af2f939efd13b979e26555'
+	'cecdeed7631a13b2382a7b8078496160f0fb0129c2330763d9d63a531ea4790f'
+)
+install=sonicmania.install
+
+pkgver() {
+	cd "$srcdir/Sonic-Mania-Decompilation"
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+	cd "$srcdir/Sonic-Mania-Decompilation"
+	git submodule update --init dependencies/RSDKv5
+	cd "$srcdir/Sonic-Mania-Decompilation/dependencies/RSDKv5"
+	git submodule update --init dependencies/all/stb_vorbis
+	git submodule update --init dependencies/all/tinyxml2
+}
+
+build() {
+	cd "$srcdir/Sonic-Mania-Decompilation/dependencies/RSDKv5"
+	make ${MAKEFLAGS:-CXXFLAGS=-O2 -j$(nproc)}
+	cd "$srcdir/Sonic-Mania-Decompilation"
+	make ${MAKEFLAGS:-CXXFLAGS=-O2 -j$(nproc)}
+}
+
+package() {
+	install -Dm755 sonicmania-launcher "$pkgdir/usr/bin/sonicmania-launcher"
+	install -Dm644 sonicmania.desktop "$pkgdir/usr/share/applications/sonicmania.desktop"
+	cd "$srcdir/Sonic-Mania-Decompilation/dependencies/RSDKv5/bin/Linux/OGL"
+	install -Dm755 RSDKv5U "$pkgdir/usr/bin/RSDKv5U"
+	cd "$srcdir/Sonic-Mania-Decompilation"
+	install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

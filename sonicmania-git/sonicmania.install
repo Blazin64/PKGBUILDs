@@ -1,0 +1,6 @@
+post_install() {
+	echo "Use 'sonicmania-launcher' to automatically run 'sonicmania' from a " \
+"'sonicmania' folder in your \$XDG_DATA_HOME or '~/.local/share' folder."
+	echo "Alternatively, you may simply run 'sonicmania' directly from any " \
+"folder containing compatible data files."
+}
